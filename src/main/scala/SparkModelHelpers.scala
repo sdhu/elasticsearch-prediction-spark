@@ -51,7 +51,7 @@ case class LinearModelData(
 )
 
   
-trait SparkModelHelpers[M <: GeneralizedLinearModel] extends Serializable {
+trait SparkModelHelpers[M <: GeneralizedLinearModel] {
   
   val name: String
 

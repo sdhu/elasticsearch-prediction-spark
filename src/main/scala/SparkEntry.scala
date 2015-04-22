@@ -1,11 +1,15 @@
 package com.sdhu.elasticsearchprediction.spark
 
-import com.mahisoft.elasticsearchprediction.utils.DataProperties
+import com.mahisoft.elasticsearchprediction._
+import utils.DataProperties
+import classifier.GenericClassifier
+import plugin.engine.PredictorEngine
 
-object SparkLinear_Trainer extends Serializable {
-  def apply(dp: DataProperties): SparkGenericTrainer[_] = {
+class Spark_Trainer(dp: DataProperties) {
+  
+  def getSparkGenericTrainer: SparkGenericTrainer[_] = {
     val config = SparkClassifierConfig().readDataProperties(dp)
-    
+  
     if (config.clf_type.nonEmpty) {
       config.clf_type.get match {
         case "linear-regression" ⇒ new SparkGenericTrainer(LinearRegression_Helper)
@@ -18,11 +22,14 @@ object SparkLinear_Trainer extends Serializable {
      throw new IllegalArgumentException("spark.clf_type must be provided")
     }
   }
+
+  def getGenericClassifier: GenericClassifier = this.getSparkGenericTrainer
 }
 
 
-object SparkLinear_PredictorEngine extends Serializable {
-  def apply(readP: String, clf_type: String): SparkPredictorEngine[_] = {
+class Spark_PredictorEngine(readP: String, clf_type: String) {
+  
+  def getSparkPredictorEngine: SparkPredictorEngine[_] = {
     val predEng = clf_type match {
       case "spark.linear-regression" ⇒ new SparkPredictorEngine(readP, LinearRegression_Helper)
       case "spark.logistic-regression" ⇒ new SparkPredictorEngine(readP, LogisticRegression_Helper)
@@ -33,4 +40,6 @@ object SparkLinear_PredictorEngine extends Serializable {
     predEng.readModel()
     predEng
   }
+
+  def getPredictorEngine: PredictorEngine = this.getSparkPredictorEngine
 }

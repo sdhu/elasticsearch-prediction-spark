@@ -15,7 +15,7 @@ class SparkTrainerSpec extends FlatSpec with MustMatchers with BeforeAndAfterAll
   val pconf = getClass.getResource("/prop1.conf").getPath
   val dataP = getClass.getResource("/mini.csv").toURI.toString
   val dp = new DataProperties(pconf)
-  val trainer = SparkLinear_Trainer(dp)
+  val trainer = (new Spark_Trainer(dp)).getSparkGenericTrainer
   val correctSPC = SparkClassifierConfig(
       Some("./src/test/resource/mini.csv"),
       Some(Set("age","sex","capital_gain","capital_loss","native-country")),
@@ -104,7 +104,7 @@ class SparkTrainerSpec extends FlatSpec with MustMatchers with BeforeAndAfterAll
   }
 
   it should "load a new Model" in {
-    val tr2 = SparkLinear_Trainer(dp)
+    val tr2 = (new Spark_Trainer(dp)).getSparkGenericTrainer
     tr2.setDataProperties(dp)
     tr2.loadClassifier(modelPath)
     val model = tr2.getModelData
