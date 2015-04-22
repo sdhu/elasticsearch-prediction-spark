@@ -191,7 +191,15 @@ class SparkGenericTrainer[M <: GeneralizedLinearModel](val sparkModelHelper: Spa
       _scOpt = Some(new SparkContext(_sparkConf))
     
     val l = _config.data_column_label.getOrElse("")
-    val ret = _config.data_columns.map(cols ⇒ ReadUtil.csv2RDD(_scOpt.get, dataFile.getPath, cols, l))
+    val ret = _config.data_columns.map(cols ⇒
+        ReadUtil.csv2RDD(
+          _scOpt.get, 
+          dataFile.getPath, 
+          cols, 
+          l))
+       //   _config.clf_isRegression.getOrElse(true),
+        //  _config.clf_binThreshold.getOrElse(0.5)))
+    
     _data = ret.map(_._1)
     _model = _model.setCategoriesMap(ret.map(_._2))
     _data.nonEmpty
@@ -276,9 +284,10 @@ class SparkGenericTrainer[M <: GeneralizedLinearModel](val sparkModelHelper: Spa
     }
   }
 
-  def saveModel(modelName: String, path: String): Boolean = 
+  def saveModel(modelName: String, path: String): Boolean = {
     sparkModelHelper.saveSparkModel(path, modelName, _model) 
-
+  } 
+    
   override def setDataProperties(dataProperties: DataProperties) = {
     _config = _config.readDataProperties(dataProperties)
     _model = _model.setProperties(_config.clf_binThreshold, _config.clf_numClasses)

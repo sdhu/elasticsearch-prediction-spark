@@ -44,7 +44,10 @@ object ReadUtil extends Serializable {
     sc: SparkContext, 
     path: String, 
     cols: Set[String], 
-    label: String): (RDD[LabeledPoint], Map[String, Double]) = {
+    label: String,
+    isRegression: Boolean = true,
+    thresh: Double = 0.5
+  ): (RDD[LabeledPoint], Map[String, Double]) = {
       val csv = sc.textFile(path)
         .map(_.split(",").map(_.trim))
       val header = csv.first.zipWithIndex
@@ -70,7 +73,14 @@ object ReadUtil extends Serializable {
           case Left(d) ⇒ d
           case Right(s) ⇒ bcCats.value.getOrElse(s, 0.0)
         })
-        LabeledPoint(dv(0), Vectors.dense(dv.drop(1)))
+
+        val lb = if (isRegression) {
+          dv(0)
+        } else {
+          if (dv(0) > thresh) 1.0 else 0.5
+        }
+
+        LabeledPoint(lb, Vectors.dense(dv.drop(1)))
       }),
       cats)
   }

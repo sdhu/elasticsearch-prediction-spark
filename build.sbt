@@ -39,12 +39,9 @@ libraryDependencies ++= Seq(
 //excluding all the mess that causes the build to break on spark...
 mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) =>
   {
-    case PathList("org", "apache", xs @ _*) => MergeStrategy.first
+    case PathList("org", "apache", xs @ _*) => MergeStrategy.last
     case PathList("com","google", "common", xs @ _*) => MergeStrategy.last
     case PathList("com", "esotericsoftware", xs @ _*) => MergeStrategy.last
-    case x if x.startsWith("META-INF") => MergeStrategy.discard
-    case x if x.endsWith(".html") => MergeStrategy.discard
-    case x if x.startsWith("plugin.properties") => MergeStrategy.last
     case x => old(x)
   }
 }

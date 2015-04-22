@@ -70,12 +70,16 @@ trait Linear_SparkModelHelpers[M <: GeneralizedLinearModel] extends SparkModelHe
    * Read into format usable by sparkGenericTrainer
    */
   def readSparkModel(path: String): ModelData[M] = {
-    val lm = readModelFromJson(path)
-    ModelData(
-      getOptClf(lm),
-      lm.categoriesMap,
-      lm.binThreshold,
-      lm.numClasses)
+    if (Files.exists(Paths.get(path))) {
+      val lm = readModelFromJson(path)
+      ModelData(
+        getOptClf(lm),
+        lm.categoriesMap,
+        lm.binThreshold,
+        lm.numClasses)
+    } else {
+      ModelData()
+    }
   }
   
   /*
