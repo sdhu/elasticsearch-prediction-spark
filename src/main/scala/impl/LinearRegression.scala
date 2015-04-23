@@ -16,8 +16,8 @@ object LinearRegression_Helper extends Linear_SparkModelHelpers[LinearRegression
       )
   }
   
-  override def getOptClf(lm: LinearModelData): Option[LinearRegressionModel] = {
-    Some(new LinearRegressionModel(Vectors.dense(lm.weights), lm.intercept))
+  override def getOptClf(lm: Option[LinearModelData]): Option[LinearRegressionModel] = {
+    lm.map(x ⇒ new LinearRegressionModel(Vectors.dense(x.weights), x.intercept))
   }
 }
 

@@ -32,7 +32,7 @@ libraryDependencies ++= Seq(
     exclude("org.eclipse.jetty.orbit", "javax.servlet").
     exclude("org.slf4j", "slf4j-api"),
   "com.holdenkarau" %% "spark-testing-base" % "1.3.0_0.0.5",
-  "org.scalatest"       %% "scalatest"              % "2.2.0" % "test" withSources()
+  "org.scalatest"       %% "scalatest"              % "2.2.4" % "test" withSources()
 )
 
 

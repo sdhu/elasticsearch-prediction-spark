@@ -1,11 +1,18 @@
 package com.sdhu.elasticsearchprediction.spark
 
+import com.mahisoft.elasticsearchprediction._
+import plugin.domain.{ IndexValue, IndexAttributeDefinition }
+import domain.DataType
+
 import org.apache.spark._
 import rdd.RDD
 import mllib.linalg.{ Vectors, Vector ⇒ spV }
 import mllib.regression.LabeledPoint
 
+import java.util.Collection
+
 import scala.util.control.Exception._
+import scala.collection.JavaConversions._
 
 
 object CsvUtil extends Serializable {
@@ -43,7 +50,7 @@ object ReadUtil extends Serializable {
   def csv2RDD(
     sc: SparkContext, 
     path: String, 
-    cols: Set[String], 
+    cols: IndexedSeq[String], 
     label: String,
     isRegression: Boolean = true,
     thresh: Double = 0.5
@@ -77,7 +84,7 @@ object ReadUtil extends Serializable {
         val lb = if (isRegression) {
           dv(0)
         } else {
-          if (dv(0) > thresh) 1.0 else 0.5
+          if (dv(0) > thresh) 1.0 else 0.0
         }
 
         LabeledPoint(lb, Vectors.dense(dv.drop(1)))
@@ -88,10 +95,22 @@ object ReadUtil extends Serializable {
 
   /*
    * Take an IndexedValue from the pplugin and convert it with appropiate categorical numerical
-   * mapping into a spark vector
+   * mapp]ng into a spark vector
+   *
+   * Uggly need to fix type conversion
    */
-  def convertIndexedValues(v: Array[String], cm: Map[String, Double]): spV = {
-    Vectors.dense(v.toDoubleArray(cm))
+  def cIndVal2Vector(v: Collection[IndexValue], cm: Map[String, Double]): spV = {
+    val a = v.map(_.getValue.asInstanceOf[String]).toArray
+    Vectors.dense(a.toDoubleArray(cm))
+  }
+
+  // not using IdexAttributeDefinition ... just set it to double
+  def arr2CIndVal(v: Array[String]): Collection[IndexValue] = {
+    val ret = v.map(s ⇒ new IndexValue(
+        new IndexAttributeDefinition("notUsed", DataType.STRING),
+        s))
+    
+    asJavaCollection[IndexValue](ret)
   }
 }
 

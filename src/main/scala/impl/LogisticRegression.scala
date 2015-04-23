@@ -17,8 +17,8 @@ object LogisticRegression_Helper extends Linear_SparkModelHelpers[LogisticRegres
       )
   }
   
-  override def getOptClf(lm: LinearModelData): Option[LogisticRegressionModel] = {
-    Some(new LogisticRegressionModel(Vectors.dense(lm.weights), lm.intercept))
+  override def getOptClf(lm: Option[LinearModelData]): Option[LogisticRegressionModel] = {
+    lm.map(x ⇒ new LogisticRegressionModel(Vectors.dense(x.weights), x.intercept))
   }
 }
 

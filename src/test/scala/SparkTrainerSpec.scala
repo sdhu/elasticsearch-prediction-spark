@@ -18,7 +18,7 @@ class SparkTrainerSpec extends FlatSpec with MustMatchers with BeforeAndAfterAll
   val trainer = (new Spark_Trainer(dp)).getSparkGenericTrainer
   val correctSPC = SparkClassifierConfig(
       Some("./src/test/resource/mini.csv"),
-      Some(Set("age","sex","capital_gain","capital_loss","native-country")),
+      Some(IndexedSeq("age","sex","capital_gain","capital_loss","native-country")),
       Some("probability"),
       Some("./src/test/resource/sparkmodel.test"),
       Some(80),

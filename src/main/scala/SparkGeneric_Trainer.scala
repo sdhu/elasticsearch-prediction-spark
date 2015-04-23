@@ -38,7 +38,7 @@ import java.lang.{Boolean ⇒ JBoolean, Integer ⇒ JInt}
  */
 case class SparkClassifierConfig(
   data_filename: Option[String] = None, 
-  data_columns: Option[Set[String]] = None,
+  data_columns: Option[IndexedSeq[String]] = None,
   data_column_label: Option[String] = None,
   model_filename: Option[String] = None,
   train_percentage: Option[Int] = Some(75),
@@ -53,7 +53,7 @@ case class SparkClassifierConfig(
   def readDataProperties(dp: DataProperties) = {
     this.copy(
       data_filename = Option(dp.getValue("data.filename")),
-      data_columns = Option(dp.getValue("data.columns")).map(_.split(",").toSet),
+      data_columns = Option(dp.getValue("data.columns")).map(_.split(",").toIndexedSeq),
       data_column_label = Option(dp.getValue("data.column.label")),
       model_filename = Option(dp.getValue("model.filename")),
       train_percentage = Option(dp.getValue("train.percentage")).map(_.toInt),
@@ -190,13 +190,16 @@ class SparkGenericTrainer[M <: GeneralizedLinearModel](val sparkModelHelper: Spa
     if (_scOpt.isEmpty)
       _scOpt = Some(new SparkContext(_sparkConf))
     
-    val l = _config.data_column_label.getOrElse("")
-    val ret = _config.data_columns.map(cols ⇒
+    val ret = _config.data_columns.map(cols ⇒ {
+        val lb: String = _config.data_column_label.getOrElse(cols.last)
+        val c = if(cols.last == lb) cols.dropRight(1) else cols
         ReadUtil.csv2RDD(
           _scOpt.get, 
           dataFile.getPath, 
-          cols, 
-          l))
+          c, 
+          lb)
+    })
+
        //   _config.clf_isRegression.getOrElse(true),
         //  _config.clf_binThreshold.getOrElse(0.5)))
     

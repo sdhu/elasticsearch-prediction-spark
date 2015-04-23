@@ -9,6 +9,7 @@ import org.json4s.jackson.Serialization
 import java.nio.file.{Paths, Files}
 import java.nio.charset.StandardCharsets
 
+import scala.util.Try
 
 /*
  * Note: This can be cleaned up a bit, and can be expanded beyond linear classifiers easily 
@@ -64,7 +65,7 @@ trait SparkModelHelpers[M <: GeneralizedLinearModel] {
 
 
 trait Linear_SparkModelHelpers[M <: GeneralizedLinearModel] extends SparkModelHelpers[M] {
-  def getOptClf(lm: LinearModelData): Option[M]
+  def getOptClf(lm: Option[LinearModelData]): Option[M]
   
   /*
    * Read into format usable by sparkGenericTrainer
@@ -74,9 +75,10 @@ trait Linear_SparkModelHelpers[M <: GeneralizedLinearModel] extends SparkModelHe
       val lm = readModelFromJson(path)
       ModelData(
         getOptClf(lm),
-        lm.categoriesMap,
-        lm.binThreshold,
-        lm.numClasses)
+        lm.map(_.categoriesMap).getOrElse(None),
+        lm.map(_.binThreshold).getOrElse(None),
+        lm.map(_.numClasses).getOrElse(None)
+      )
     } else {
       ModelData()
     }
@@ -120,9 +122,11 @@ trait Linear_SparkModelHelpers[M <: GeneralizedLinearModel] extends SparkModelHe
       Files.write(Paths.get(path), jx_str.getBytes(StandardCharsets.UTF_8))
   }
 
-  def readModelFromJson(path: String): LinearModelData = {
-    implicit val formats = Serialization.formats(NoTypeHints)
-    val s = scala.io.Source.fromFile(path).getLines.mkString
-    Serialization.read[LinearModelData](s)
+  def readModelFromJson(path: String): Option[LinearModelData] = {
+    Try {
+      implicit val formats = Serialization.formats(NoTypeHints)
+      val s = scala.io.Source.fromFile(path).getLines.mkString
+      Serialization.read[LinearModelData](s)
+    }.toOption
   }
 }

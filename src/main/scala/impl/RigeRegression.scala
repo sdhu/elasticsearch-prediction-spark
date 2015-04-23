@@ -17,8 +17,8 @@ object RidgeRegression_Helper extends Linear_SparkModelHelpers[RidgeRegressionMo
       )
   }
   
-  override def getOptClf(lm: LinearModelData): Option[RidgeRegressionModel] = {
-    Some(new RidgeRegressionModel(Vectors.dense(lm.weights), lm.intercept))
+  override def getOptClf(lm: Option[LinearModelData]): Option[RidgeRegressionModel] = {
+    lm.map(x ⇒ new RidgeRegressionModel(Vectors.dense(x.weights), x.intercept))
   }
 }
 

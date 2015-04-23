@@ -18,8 +18,8 @@ object SVM_Helper extends Linear_SparkModelHelpers[SVMModel]{
       )
   }
   
-  override def getOptClf(lm: LinearModelData): Option[SVMModel] = {
-    Some(new SVMModel(Vectors.dense(lm.weights), lm.intercept))
+  override def getOptClf(lm: Option[LinearModelData]): Option[SVMModel] = {
+    lm.map(x ⇒ new SVMModel(Vectors.dense(x.weights), x.intercept))
   }
 }
 
