@@ -16,7 +16,7 @@ class SparkPredictorEngine[M <: GeneralizedLinearModel](val readPath: String, va
   override def getPrediction(values: Collection[IndexValue]): Double = {
     if (_model.clf.nonEmpty) { 
       val v = ReadUtil.cIndVal2Vector(
-        values, //a bit ugly 
+        values,  
         _model.categoriesMap.getOrElse(Map[String, Double]()))
       
       _model.clf.get.predict(v)

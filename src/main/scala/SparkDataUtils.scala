@@ -13,7 +13,7 @@ import java.util.Collection
 
 import scala.util.control.Exception._
 import scala.collection.JavaConversions._
-
+import scala.util.Random
 
 object CsvUtil extends Serializable {
 
@@ -75,7 +75,7 @@ object ReadUtil extends Serializable {
       val cats = categories.keys.zipWithIndex.map(x ⇒ (x._1, x._2.toDouble + 1.0)).toMap
       val bcCats = sc.broadcast(cats)
 
-      (select_csv.map(x ⇒ {
+      val ret = select_csv.map(x ⇒ {
         val dv = x.map(_ match {
           case Left(d) ⇒ d
           case Right(s) ⇒ bcCats.value.getOrElse(s, 0.0)
@@ -88,8 +88,10 @@ object ReadUtil extends Serializable {
         }
 
         LabeledPoint(lb, Vectors.dense(dv.drop(1)))
-      }),
-      cats)
+      })
+
+
+      (ret, cats)
   }
 
 
@@ -100,8 +102,13 @@ object ReadUtil extends Serializable {
    * Uggly need to fix type conversion
    */
   def cIndVal2Vector(v: Collection[IndexValue], cm: Map[String, Double]): spV = {
-    val a = v.map(_.getValue.asInstanceOf[String]).toArray
-    Vectors.dense(a.toDoubleArray(cm))
+    val a = v.map(x ⇒ x.getDefinition.getType match {
+        case DataType.DOUBLE ⇒ x.getValue.asInstanceOf[Double].toString
+        case _ ⇒ x.getValue.asInstanceOf[String]
+      }).toArray.toDoubleArray(cm)
+
+    println(s"array ${a.mkString(",")}") 
+    Vectors.dense(a)
   }
 
   // not using IdexAttributeDefinition ... just set it to double

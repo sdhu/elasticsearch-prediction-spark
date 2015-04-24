@@ -197,7 +197,8 @@ class SparkGenericTrainer[M <: GeneralizedLinearModel](val sparkModelHelper: Spa
           _scOpt.get, 
           dataFile.getPath, 
           c, 
-          lb)
+          lb
+        )
     })
 
        //   _config.clf_isRegression.getOrElse(true),
