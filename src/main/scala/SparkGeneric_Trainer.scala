@@ -299,15 +299,16 @@ class SparkGenericTrainer[M <: GeneralizedLinearModel](val sparkModelHelper: Spa
     //validate that required fields have been passed....
     if (_config.checkValid){
       
-     // for ( (spK, spV) ← _config.spark_conf.get){
-     //   _sparkConf = _sparkConf.set(spK, spV)
-     // }
      // log.info(s"Setting ${sparkModelHelper.name} DataProperties")
       val spc = _config.spark_conf.get
       _sparkConf = _sparkConf.setAppName(sparkModelHelper.name)
         .setMaster(spc.getOrElse("spark.master","local[4]"))
-        
-
+      
+      // configure all other spark settings
+      val spc2 = if (spc.contains("spark.master")) spc - "spark.master" else spc
+      for ( (spK, spV) ← spc2.toSeq){
+        _sparkConf = _sparkConf.set(spK, spV)
+      }
     }
     else{
       log.error(s"Invalid Setting ${sparkModelHelper.name} DataProperties")
